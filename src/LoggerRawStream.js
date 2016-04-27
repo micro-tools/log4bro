@@ -88,12 +88,12 @@ LoggerRawStream.prototype.levelToName = function(num) {
 LoggerRawStream.prototype.levelToColorWrap = function(str, level) {
     switch (level){
         case 10: return chalk.white(str);
-        case 20: return chalk.blue(str);
+        case 20: return chalk.cyan(str);
         case 30: return chalk.green(str);
         case 40: return chalk.yellow(str);
         case 50: return chalk.red(str);
         case 60: return chalk.purple(str);
-        default: return chalk.cyan(str);
+        default: return chalk.blue(str);
     }
 };
 

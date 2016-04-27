@@ -40,7 +40,7 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode) 
     var streams = [
         {
             "type": "raw",
-            "level": productionMode ? "WARN" : "DEBUG",
+            "level": productionMode ? "WARN" : "TRACE",
             "stream": new RawStream(null) //will only write to console/stdout
         }
     ];
