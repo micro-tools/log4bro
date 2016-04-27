@@ -1,0 +1,30 @@
+{
+  "name": "log4bro",
+  "version": "1.0.0",
+  "description": "no-brain logger with perfect output format, based on bunyan.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krystianity/log4bro.git"
+  },
+  "keywords": [
+    "logger",
+    "simple",
+    "microservice logging",
+    "logging",
+    "log4bro"
+  ],
+  "author": "Christian Fröhlingsdorf <chris@5cf.de>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/krystianity/log4bro"
+  },
+  "homepage": "https://github.com/krystianity/log4bro",
+  "dependencies": {
+    "chalk": "~1.1.1",
+    "bunyan": "~1.7.1",
+    "graceful-fs": "~4.1.3"
+  },
+  "devDependencies": {}
+}
