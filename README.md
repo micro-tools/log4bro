@@ -20,10 +20,12 @@ const logger = new log4bro(options);
 //in any other script/class
 //- logger becomes a global object
 
+LOG.trace("bla");
 LOG.debug("bla");
 LOG.info("bla");
 LOG.warn("bla");
 LOG.error("bla");
+LOG.fatal("bla");
 
 //thats all there is to it..
 ```

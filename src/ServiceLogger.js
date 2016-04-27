@@ -100,6 +100,11 @@ ServiceLogger.prototype.setGlobal = function() {
     global.LOG = this;
 };
 
+ServiceLogger.prototype.trace = function(message) {
+    if (this.silence) return;
+    this.LOG.trace(this.enhance(message));
+};
+
 ServiceLogger.prototype.debug = function(message) {
     if (this.silence) return;
     this.LOG.debug(this.enhance(message));
@@ -118,6 +123,11 @@ ServiceLogger.prototype.warn = function(message) {
 ServiceLogger.prototype.error = function(message) {
     if (this.silence) return;
     this.LOG.error(this.enhance(message));
+};
+
+ServiceLogger.prototype.fatal = function(message) {
+    if (this.silence) return;
+    this.LOG.fatal(this.enhance(message));
 };
 
 ServiceLogger.prototype.enhance = function(message) {
