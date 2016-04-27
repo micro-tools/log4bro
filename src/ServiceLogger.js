@@ -35,7 +35,6 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode) 
         //console.dir = function() {};
     }
 
-    this.skipEnhance = skipEnhance || true;
     this.logDir = logDir || "logs";
 
     var streams = [
