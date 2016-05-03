@@ -2,7 +2,7 @@ var fs = require("fs");
 var bunyan = require("bunyan");
 var RawStream = require("./LoggerRawStream.js");
 
-function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode) {
+function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey) {
 
     if (ServiceLogger.instance) return ServiceLogger.instance;
 
@@ -11,8 +11,12 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode) 
         logDir = loggerName.logDir;
         silence = loggerName.silence;
         dockerMode = loggerName.dockerMode;
+        varKey = loggerName.varKey;
+
         loggerName = loggerName.name; //last
     }
+
+    this.varKey = varKey || "LOG";
 
     this.dockerMode = dockerMode || false;
 
@@ -97,7 +101,7 @@ ServiceLogger.prototype.getLogger = function() {
 };
 
 ServiceLogger.prototype.setGlobal = function() {
-    global.LOG = this;
+    global[this.varKey] = this;
 };
 
 ServiceLogger.prototype.trace = function(message) {

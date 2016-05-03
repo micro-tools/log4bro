@@ -12,7 +12,8 @@ const options = {
   "logDir": "logs", //relative directory to write log file to
   "silence": false, //silences logger
   "loggerName": "dev", //ignore
-  "dockerMode": true //disables output to logfile
+  "dockerMode": true, //disables output to logfile
+  "varKey": "LOG" //name of global variable
 };
 
 const logger = new log4bro(options);
