@@ -111,7 +111,9 @@ LoggerRawStream.prototype.checkAndFlushBuffer = function() {
     }
 
     clearTimeout(this._timeout); //buffer limit not reached, reset a timer to process buffer after timeout, if no more logs are sent
-    this._timeout = setTimeout(this.processBuffer.apply(this), this.bufferTimeout);
+
+    var self = this;
+    this._timeout = setTimeout(function(){ self.processBuffer(); }, this.bufferTimeout);
 };
 
 /**
