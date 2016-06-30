@@ -2,9 +2,7 @@ var fs = require("fs");
 var bunyan = require("bunyan");
 var RawStream = require("./LoggerRawStream.js");
 
-function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey) {
-
-    if (ServiceLogger.instance) return ServiceLogger.instance;
+function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions) {
 
     if(typeof loggerName === "object" && arguments.length === 1){
         productionMode = loggerName.productionMode;
@@ -12,75 +10,69 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         silence = loggerName.silence;
         dockerMode = loggerName.dockerMode;
         varKey = loggerName.varKey;
+        logFieldOptions = loggerName.logFieldOptions;
 
         loggerName = loggerName.name; //last
     }
 
     this.varKey = varKey || "LOG";
-
     this.dockerMode = dockerMode || false;
+    this.logFieldOptions = logFieldOptions || null;
+    this.silence = silence || false;
+    this.logDir = logDir || "logs";
 
     if (!loggerName && !productionMode) {
-        loggerName = loggerName || "dev";
+        this.loggerName = loggerName || "dev";
     } else {
-        loggerName = loggerName || "prod";
+        this.loggerName = loggerName || "prod";
     }
 
     if(productionMode){
-        console.log("[ServiceLogger] Logger is in production mode.");
+        console.log("[log4bro] Logger is in production mode.");
     } else {
-        console.log("[ServiceLogger] Logger is in development mode.");
+        console.log("[log4bro] Logger is in development mode.");
     }
-
-    this.silence = silence || false;
-    if (this.silence) {
-        //console.log("Any kind of logger was silenced!");
-        //console.log = function() {};
-        //console.dir = function() {};
-    }
-
-    this.logDir = logDir || "logs";
 
     var streams = [
         {
             "type": "raw",
             "level": productionMode ? "WARN" : "TRACE",
-            "stream": new RawStream(null) //will only write to console/stdout
+            "stream": new RawStream(null, this.logFieldOptions, this.dockerMode) //will only write to console/stdout
         }
     ];
 
-    if(!dockerMode){
+    if(!this.dockerMode){
+
+        console.log("[log4bro] Logger is not in docker mode.");
+        this.createLoggingDir();
+
         streams.push({
             "type": "raw",
             "level": productionMode ? "WARN" : "INFO",
-            "stream": new RawStream(this.logDir + "/service-log.json") //will only write to logfile
+            "stream": new RawStream(this.logDir + "/service-log.json", this.logFieldOptions) //will only write to logfile
         });
     } else {
-        console.log("[ServiceLogger] Logger is in docker mode.");
+        console.log("[log4bro] Logger is in docker mode.");
     }
 
-    this.createLoggingDir();
     this.LOG = bunyan.createLogger({
-        "name": loggerName,
+        "name": this.loggerName,
         "streams": streams,
         "src": false
     });
 
     this.setGlobal();
-
-    ServiceLogger.instance = this;
-    return this;
 }
 
 ServiceLogger.prototype.createLoggingDir = function() {
 
     if (!fs.existsSync(this.logDir)) {
-        console.log("[ServiceLogger] Logs folder does not exists creating " + this.logDir + " make sure to set path in blammo.xml.");
+        console.log("[log4bro] Logs folder does not exists creating " + this.logDir + " make sure to set path in blammo.xml.");
         fs.mkdirSync(this.logDir);
         return;
     }
 
-    console.log("[ServiceLogger] Logs folder exists, clearing " + this.logDir);
+    console.log("[log4bro] Logs folder exists, clearing " + this.logDir);
 
     var files = null;
     try { files = fs.readdirSync(this.logDir); }
@@ -94,10 +86,6 @@ ServiceLogger.prototype.createLoggingDir = function() {
             else
                 fs.rmDir(filePath);
         }
-};
-
-ServiceLogger.prototype.getLogger = function() {
-    return this;
 };
 
 ServiceLogger.prototype.setGlobal = function() {
@@ -136,6 +124,17 @@ ServiceLogger.prototype.fatal = function(message) {
 
 ServiceLogger.prototype.enhance = function(message) {
     /* enhance */
+
+    //TODO hmm..
+    if(typeof message === "object"){
+
+        if(Object.keys(message).length <= 15){
+            return JSON.stringify(message);
+        }
+
+        return "[Object object, with more than 15 keys.]";
+    }
+
     return message;
 };
 

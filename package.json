@@ -1,9 +1,11 @@
 {
   "name": "log4bro",
-  "version": "1.0.5",
-  "description": "no-brain logger with perfect output format, based on bunyan.",
+  "version": "1.0.6",
+  "description": "no-brain logger with compliant output format, based on bunyan.",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "start": "node ./src/example/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/krystianity/log4bro.git"
