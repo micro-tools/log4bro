@@ -1,4 +1,4 @@
-# log4bro (nodejs logger)
+# log4bro
 
 - log4bro makes it hassle free to have compliant microservice log behaviour
 - just require & init and log via global variable in a few seconds
@@ -42,7 +42,7 @@ LOG.fatal("bla");
 # different example show text & json output
  - (just run npm start to run example locally)
 
-```
+```javascript
 var log4bro = require("log4bro");
 
 var options = {
@@ -94,3 +94,4 @@ JLOG.fatal(msg);
 
 - enjoy.. need help? contact me.. @krystianity or on twitter: @silentleave
 - author: Christian Fröhlingsdorf, <chris@5cf.de>
+- license: MIT
