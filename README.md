@@ -67,6 +67,8 @@ MLOG.warn(msg);
 MLOG.error(msg);
 MLOG.fatal(msg);
 
+MLOG.info(options);
+
 console.log("");
 /* json style */
 
@@ -78,7 +80,12 @@ var options2 = {
     "silence": false,
     "loggerName": "dev",
     "dockerMode": true,
-    "varKey": "JLOG"
+    "varKey": "JLOG",
+    "logFieldOptions": {
+        "log_type": "application",
+        "application_type": "service",
+        "service": "bro-service"
+    }
 };
 
 var logger2 = new log4bro(options2);
@@ -90,6 +97,7 @@ JLOG.warn(msg);
 JLOG.error(msg);
 JLOG.fatal(msg);
 
+JLOG.error(options2);
 ```
 
 - enjoy.. need help? contact me.. @krystianity or on twitter: @silentleave
