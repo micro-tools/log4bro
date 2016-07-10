@@ -1,6 +1,12 @@
 var fs = require("fs");
 var bunyan = require("bunyan");
+var ns = require('continuation-local-storage');
+
 var RawStream = require("./LoggerRawStream.js");
+var Middlewares = require("./ExpressMiddlewares.js");
+
+const NAMESPACE = "log4bro.ns";
+const CORRELATION_HEADER = "correlation-id";
 
 function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions) {
 
@@ -88,6 +94,40 @@ ServiceLogger.prototype.createLoggingDir = function() {
         }
 };
 
+ServiceLogger.prototype.applyMiddlewareAccessLog = function(expressApp){
+
+    if(!expressApp || typeof expressApp !== "function"){
+        throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
+    }
+
+    expressApp.use(Middlewares.accessLogMiddleware());
+    return expressApp;
+};
+
+ServiceLogger.prototype.applyMiddlewareAccessLogFile = function(expressApp, logFilePath){
+
+    if(!expressApp || typeof expressApp !== "function"){
+        throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
+    }
+
+    if(!logFilePath){
+        throw new Error("[log4bro] logFilePath is empty on applyMiddlewareAccessLogFile.");
+    }
+
+    expressApp.use(Middlewares.accessLogMiddlewareFile(logFilePath));
+    return expressApp;
+};
+
+ServiceLogger.prototype.applyMiddlewareCorrelationId = function(expressApp){
+
+    if(!expressApp || typeof expressApp !== "function"){
+        throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
+    }
+
+    expressApp.use(Middlewares.correlationIdMiddleware(NAMESPACE, CORRELATION_HEADER, this.varKey));
+    return expressApp;
+};
+
 ServiceLogger.prototype.setGlobal = function() {
     global[this.varKey] = this;
 };
@@ -129,10 +169,18 @@ ServiceLogger.prototype.enhance = function(message) {
     if(typeof message === "object"){
 
         if(Object.keys(message).length <= 15){
-            return JSON.stringify(message);
+            message = JSON.stringify(message);
+        } else {
+            message = "[Object object, with more than 15 keys.]";
         }
+    }
 
-        return "[Object object, with more than 15 keys.]";
+    var namespace = ns.getNamespace(NAMESPACE);
+    if (namespace) {
+        var correlationId = namespace.get(CORRELATION_HEADER);
+        if (correlationId) {
+            return "correlationId: " + correlationId + " " + message;
+        }
     }
 
     return message;

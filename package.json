@@ -1,10 +1,11 @@
 {
   "name": "log4bro",
-  "version": "1.2.1",
+  "version": "1.5.2",
   "description": "no-brain logger with compliant output format, based on bunyan.",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/example/index.js"
+    "start": "node ./src/example/index.js",
+    "express": "node ./src/example/express_example.js"
   },
   "repository": {
     "type": "git",
@@ -15,7 +16,10 @@
     "simple",
     "microservice logging",
     "logging",
-    "log4bro"
+    "log4bro",
+    "access log",
+    "correlation id",
+    "correlation-id"
   ],
   "author": "Christian Fröhlingsdorf <chris@5cf.de>",
   "license": "MIT",
@@ -26,7 +30,12 @@
   "dependencies": {
     "chalk": "~1.1.1",
     "bunyan": "~1.7.1",
-    "graceful-fs": "~4.1.3"
+    "graceful-fs": "~4.1.3",
+    "morgan": "~1.7.0",
+    "uuid": "~2.0.2",
+    "continuation-local-storage": "~3.1.7"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "express": "*"
+  }
 }
