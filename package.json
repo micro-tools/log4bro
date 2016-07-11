@@ -1,6 +1,6 @@
 {
   "name": "log4bro",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "no-brain logger with compliant output format, based on bunyan.",
   "main": "index.js",
   "scripts": {
