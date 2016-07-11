@@ -36,6 +36,7 @@
     "continuation-local-storage": "~3.1.7"
   },
   "devDependencies": {
-    "express": "*"
+    "express": "*",
+    "request": "*"
   }
 }

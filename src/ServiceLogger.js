@@ -67,6 +67,7 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         "src": false
     });
 
+    this.productionMode = productionMode;
     this.setGlobal();
 }
 
@@ -133,12 +134,12 @@ ServiceLogger.prototype.setGlobal = function() {
 };
 
 ServiceLogger.prototype.trace = function(message) {
-    if (this.silence) return;
+    if (this.silence || this.productionMode) return; //safe memory & cpu
     this.LOG.trace(this.enhance(message));
 };
 
 ServiceLogger.prototype.debug = function(message) {
-    if (this.silence) return;
+    if (this.silence || this.productionMode) return; //safe memory & cpu
     this.LOG.debug(this.enhance(message));
 };
 
@@ -165,22 +166,25 @@ ServiceLogger.prototype.fatal = function(message) {
 ServiceLogger.prototype.enhance = function(message) {
     /* enhance */
 
-    //TODO hmm..
+    var correlationId = null;
+    var namespace = ns.getNamespace(NAMESPACE);
+    if (namespace) {
+        correlationId = namespace.get(CORRELATION_HEADER);
+    }
+
     if(typeof message === "object"){
+
+        if (correlationId) {
+            message.correlationId = correlationId;
+        }
 
         if(Object.keys(message).length <= 15){
             message = JSON.stringify(message);
         } else {
             message = "[Object object, with more than 15 keys.]";
         }
-    }
-
-    var namespace = ns.getNamespace(NAMESPACE);
-    if (namespace) {
-        var correlationId = namespace.get(CORRELATION_HEADER);
-        if (correlationId) {
-            return "correlationId: " + correlationId + " " + message;
-        }
+    } else {
+        message = JSON.stringify({ "correlationId": correlationId, "msg": message });
     }
 
     return message;

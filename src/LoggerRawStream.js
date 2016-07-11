@@ -87,6 +87,12 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
         delete log.msg;
     }
 
+    //re-locate the correlationId
+    if(jmsg && !log.correlationId && jmsg.correlationId){
+        log["correlationId"] = JSON.parse(JSON.stringify(jmsg.correlationId));
+        delete["msg_json"].correlationId;
+    }
+
     if(this.logFieldKeys){
         for(var i = 0; i < this.logFieldKeys.length; i++){
             log[this.logFieldKeys[i]] = this.logFieldOptions[this.logFieldKeys[i]];

@@ -1,4 +1,5 @@
 var express = require("express");
+var request = require("request");
 var log4bro = require("./../../index.js");
 
 var options = {
@@ -8,7 +9,7 @@ var options = {
     "namespace": "",
     "silence": false,
     "loggerName": "dev",
-    "dockerMode": false,
+    "dockerMode": true,
     "varKey": "MLOG"
 };
 
@@ -30,11 +31,15 @@ logger.applyMiddlewareAccessLog(app);
 app.get("/", function (req, res) {
     setTimeout(function(){
         MLOG.info("yeah broooo..");
-        res.send("yeah bro!");
+        res.json({ "correlationId": req.headers["correlation-id"] });
     }, 1500);
 });
 
 var port = 1337;
 app.listen(port, function(){
     MLOG.info("listening at " + port);
+
+    request({ "url": "http://localhost:" + port + "/" }, function(err, response, body){
+        MLOG.info(body);
+    });
 });
