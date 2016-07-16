@@ -184,7 +184,10 @@ ServiceLogger.prototype.enhance = function(message) {
             message = "[Object object, with more than 15 keys.]";
         }
     } else {
-        message = JSON.stringify({ "correlationId": correlationId, "msg": message });
+        
+        if(correlationId){
+            message = JSON.stringify({ "correlationId": correlationId, "msg": message });
+        }
     }
 
     return message;

@@ -60,7 +60,7 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
 
     //time -> @timestamp
     if (log.time) {
-        log["@timestamp"] = JSON.parse(JSON.stringify(log.time));
+        log["@timestamp"] = _log.time;
         delete log.time;
     }
 
@@ -77,7 +77,7 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
     //level -> loglevel_value(int) + loglevel(string)
     if(log.level !== null){
         log["loglevel"] = this.levelToName(log.level);
-        log["loglevel_value"] = JSON.parse(JSON.stringify(log.level));
+        log["loglevel_value"] = _log.level;
         delete log.level;
     }
 
@@ -89,8 +89,16 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
 
     //re-locate the correlationId
     if(jmsg && !log.correlationId && jmsg.correlationId){
-        log["correlationId"] = JSON.parse(JSON.stringify(jmsg.correlationId));
-        delete["msg_json"].correlationId;
+
+        log["correlationId"] = jmsg.correlationId;
+        delete log.msg_json.correlationId;
+
+        //and msg field
+        if(jmsg.msg){
+            log["msg"] = jmsg.msg;
+            jmsg = null;
+            delete log.msg_json.msg;
+        }
     }
 
     if(this.logFieldKeys){

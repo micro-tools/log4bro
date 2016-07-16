@@ -31,7 +31,8 @@ logger.applyMiddlewareAccessLog(app);
 app.get("/", function (req, res) {
     setTimeout(function(){
         MLOG.info("yeah broooo..");
-        res.json({ "correlationId": req.headers["correlation-id"] });
+        MLOG.error("this should not be in msg_json");
+        res.json({ "_correlationId": req.headers["correlation-id"] });
     }, 1500);
 });
 
@@ -40,6 +41,6 @@ app.listen(port, function(){
     MLOG.info("listening at " + port);
 
     request({ "url": "http://localhost:" + port + "/" }, function(err, response, body){
-        MLOG.info(body);
+        MLOG.warn(body);
     });
 });
