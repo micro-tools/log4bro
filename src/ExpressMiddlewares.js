@@ -18,7 +18,7 @@ ExpressMiddlewares.accessLogMiddleware = function () {
     });
 
     return morgan(
-        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"service\": \"mobile-gateway\", \"application_type\": \"service\", \"log_type\": \"access\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
+        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
         {});
 };
 
@@ -35,7 +35,7 @@ ExpressMiddlewares.accessLogMiddlewareFile = function (filePath) {
     var accessLogStream = fs.createWriteStream(filePath, {flags: 'a'});
 
     return morgan(
-        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"service\": \"mobile-gateway\", \"application_type\": \"service\", \"log_type\": \"access\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
+        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
         {stream: accessLogStream});
 };
 
