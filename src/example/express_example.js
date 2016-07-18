@@ -10,7 +10,9 @@ var options = {
     "silence": false,
     "loggerName": "dev",
     "dockerMode": true,
-    "varKey": "MLOG"
+    "varKey": "MLOG",
+    "logLevel": "DEBUG",
+    "serviceName": "cool-service"
 };
 
 var logger = new log4bro(options);

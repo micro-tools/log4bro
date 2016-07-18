@@ -7,7 +7,9 @@ const CORRELATION_HEADER = "correlation-id";
 
 var ExpressMiddlewares = {}; //static
 
-ExpressMiddlewares.accessLogMiddleware = function () {
+ExpressMiddlewares.accessLogMiddleware = function (serviceName) {
+
+    serviceName = serviceName || "unknown";
 
     morgan.token("uri", function getUri(request, response) {
         return request._parsedUrl.pathname;
@@ -18,7 +20,7 @@ ExpressMiddlewares.accessLogMiddleware = function () {
     });
 
     return morgan(
-        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
+        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"service\": \"" + serviceName + "\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
         {});
 };
 

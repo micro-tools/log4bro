@@ -8,7 +8,7 @@ var Middlewares = require("./ExpressMiddlewares.js");
 const NAMESPACE = "log4bro.ns";
 const CORRELATION_HEADER = "correlation-id";
 
-function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions) {
+function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, logLevel, serviceName) {
 
     if(typeof loggerName === "object" && arguments.length === 1){
         productionMode = loggerName.productionMode;
@@ -17,23 +17,29 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         dockerMode = loggerName.dockerMode;
         varKey = loggerName.varKey;
         logFieldOptions = loggerName.logFieldOptions;
+        logLevel = loggerName.logLevel;
+        serviceName = loggerName.serviceName;
 
         loggerName = loggerName.name; //last
+
     }
 
+    this.productionMode = productionMode || false;
     this.varKey = varKey || "LOG";
     this.dockerMode = dockerMode || false;
     this.logFieldOptions = logFieldOptions || null;
     this.silence = silence || false;
     this.logDir = logDir || "logs";
+    this.logLevel = logLevel || (productionMode ? "WARN" : "DEBUG");
+    this.serviceName = serviceName || "undefined";
 
-    if (!loggerName && !productionMode) {
+    if (!loggerName && !this.productionMode) {
         this.loggerName = loggerName || "dev";
     } else {
         this.loggerName = loggerName || "prod";
     }
 
-    if(productionMode){
+    if(this.productionMode){
         console.log("[log4bro] Logger is in production mode.");
     } else {
         console.log("[log4bro] Logger is in development mode.");
@@ -42,7 +48,7 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
     var streams = [
         {
             "type": "raw",
-            "level": productionMode ? "WARN" : "TRACE",
+            "level": this.logLevel,
             "stream": new RawStream(null, this.logFieldOptions, this.dockerMode) //will only write to console/stdout
         }
     ];
@@ -54,7 +60,7 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
 
         streams.push({
             "type": "raw",
-            "level": productionMode ? "WARN" : "INFO",
+            "level": this.logLevel,
             "stream": new RawStream(this.logDir + "/service-log.json", this.logFieldOptions) //will only write to logfile
         });
     } else {
@@ -67,7 +73,6 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         "src": false
     });
 
-    this.productionMode = productionMode;
     this.setGlobal();
 }
 
@@ -101,7 +106,7 @@ ServiceLogger.prototype.applyMiddlewareAccessLog = function(expressApp){
         throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
     }
 
-    expressApp.use(Middlewares.accessLogMiddleware());
+    expressApp.use(Middlewares.accessLogMiddleware(this.serviceName));
     return expressApp;
 };
 

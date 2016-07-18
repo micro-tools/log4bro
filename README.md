@@ -121,8 +121,10 @@ var options = {
     "namespace": "",
     "silence": false,
     "loggerName": "dev",
-    "dockerMode": false,
-    "varKey": "MLOG"
+    "dockerMode": true,
+    "varKey": "MLOG",
+    "logLevel": "DEBUG",
+    "serviceName": "cool-service"
 };
 
 var logger = new log4bro(options);
