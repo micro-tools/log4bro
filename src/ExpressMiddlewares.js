@@ -20,7 +20,7 @@ ExpressMiddlewares.accessLogMiddleware = function (serviceName) {
     });
 
     return morgan(
-        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"service\": \"" + serviceName + "\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
+        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlation-id\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"service\": \"" + serviceName + "\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
         {});
 };
 
