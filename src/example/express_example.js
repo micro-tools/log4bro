@@ -3,7 +3,7 @@ var request = require("request");
 var log4bro = require("./../../index.js");
 
 var options = {
-    "productionMode": false,
+    "productionMode": true,
     "logDir": "logs",
     "skipEnhance": true,
     "namespace": "",
@@ -11,7 +11,7 @@ var options = {
     "loggerName": "dev",
     "dockerMode": true,
     "varKey": "MLOG",
-    "logLevel": "DEBUG",
+    "level": "DEBUG",
     "serviceName": "cool-service"
 };
 
@@ -33,6 +33,7 @@ logger.applyMiddlewareAccessLog(app);
 app.get("/", function (req, res) {
     setTimeout(function(){
         MLOG.info("yeah broooo..");
+        MLOG.debug("wuuut");
         MLOG.error("this should not be in msg_json");
         res.json({ "_correlationId": req.headers["correlation-id"] });
     }, 1500);

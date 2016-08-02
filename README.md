@@ -123,7 +123,7 @@ var options = {
     "loggerName": "dev",
     "dockerMode": true,
     "varKey": "MLOG",
-    "logLevel": "DEBUG",
+    "level": "DEBUG",
     "serviceName": "cool-service"
 };
 

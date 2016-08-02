@@ -1,6 +1,8 @@
 var fs = require("graceful-fs");
 var chalk = require("chalk");
 
+const CORRELATION_ID = "correlation-id";
+
 /***
  * Stream class that enables bunyan to write custom fields to the log
  * e.g. switching time to @timestamp
@@ -87,11 +89,11 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
         delete log.msg;
     }
 
-    //re-locate the correlationId
-    if(jmsg && !log.correlationId && jmsg.correlationId){
+    //re-locate the correlation-id
+    if(jmsg && !log[CORRELATION_ID] && jmsg[CORRELATION_ID]){
 
-        log["correlationId"] = jmsg.correlationId;
-        delete log.msg_json.correlationId;
+        log[CORRELATION_ID] = jmsg[CORRELATION_ID];
+        delete log.msg_json[CORRELATION_ID];
 
         //and msg field
         if(jmsg.msg){

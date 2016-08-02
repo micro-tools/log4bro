@@ -7,8 +7,9 @@ var Middlewares = require("./ExpressMiddlewares.js");
 
 const NAMESPACE = "log4bro.ns";
 const CORRELATION_HEADER = "correlation-id";
+const LOG_LEVELS = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
 
-function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, logLevel, serviceName) {
+function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, level, serviceName) {
 
     if(typeof loggerName === "object" && arguments.length === 1){
         productionMode = loggerName.productionMode;
@@ -17,11 +18,15 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         dockerMode = loggerName.dockerMode;
         varKey = loggerName.varKey;
         logFieldOptions = loggerName.logFieldOptions;
-        logLevel = loggerName.logLevel;
+        level = loggerName.level || loggerName.logLevel; //support fallback to older key named "logLevel"
         serviceName = loggerName.serviceName;
 
         loggerName = loggerName.name; //last
+    }
 
+    if(level && LOG_LEVELS.indexOf(level) === -1){
+        console.log("[log4bro] level is not a supported logLevel: " + level + ", defaulting to INFO.");
+        level = "INFO";
     }
 
     this.productionMode = productionMode || false;
@@ -30,8 +35,14 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
     this.logFieldOptions = logFieldOptions || null;
     this.silence = silence || false;
     this.logDir = logDir || "logs";
-    this.logLevel = logLevel || (productionMode ? "WARN" : "DEBUG");
+    this.logLevel = level || (productionMode ? "WARN" : "DEBUG"); //level -> logLevel (dockerconfig cannot set camelcase)
     this.serviceName = serviceName || "undefined";
+
+    this.skipDebug = false;
+    if(this.silence || (this.productionMode &&
+        !(this.logLevel === "TRACE" || this.logLevel === "DEBUG"))){
+        this.skipDebug = true;
+    }
 
     if (!loggerName && !this.productionMode) {
         this.loggerName = loggerName || "dev";
@@ -39,11 +50,10 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         this.loggerName = loggerName || "prod";
     }
 
-    if(this.productionMode){
-        console.log("[log4bro] Logger is in production mode.");
-    } else {
-        console.log("[log4bro] Logger is in development mode.");
-    }
+    console.log("[log4bro] Logger is: in-prod=" + this.productionMode +
+        ", in-docker:" + this.dockerMode +
+        ", level=" + this.logLevel +
+        ", skipDebug=" + this.skipDebug);
 
     var streams = [
         {
@@ -63,8 +73,6 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
             "level": this.logLevel,
             "stream": new RawStream(this.logDir + "/service-log.json", this.logFieldOptions) //will only write to logfile
         });
-    } else {
-        console.log("[log4bro] Logger is in docker mode.");
     }
 
     this.LOG = bunyan.createLogger({
@@ -139,12 +147,12 @@ ServiceLogger.prototype.setGlobal = function() {
 };
 
 ServiceLogger.prototype.trace = function(message) {
-    if (this.silence || this.productionMode) return; //safe memory & cpu
+    if (this.skipDebug) return; //safe memory & cpu
     this.LOG.trace(this.enhance(message));
 };
 
 ServiceLogger.prototype.debug = function(message) {
-    if (this.silence || this.productionMode) return; //safe memory & cpu
+    if (this.skipDebug) return; //safe memory & cpu
     this.LOG.debug(this.enhance(message));
 };
 
@@ -180,7 +188,7 @@ ServiceLogger.prototype.enhance = function(message) {
     if(typeof message === "object"){
 
         if (correlationId) {
-            message.correlationId = correlationId;
+            message["correlation-id"] = correlationId;
         }
 
         if(Object.keys(message).length <= 15){
@@ -191,7 +199,7 @@ ServiceLogger.prototype.enhance = function(message) {
     } else {
         
         if(correlationId){
-            message = JSON.stringify({ "correlationId": correlationId, "msg": message });
+            message = JSON.stringify({ "correlation-id": correlationId, "msg": message });
         }
     }
 
