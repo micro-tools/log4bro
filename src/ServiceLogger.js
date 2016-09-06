@@ -12,10 +12,10 @@ const LOG_LEVELS = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
 function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, level, serviceName) {
 
     if(typeof loggerName === "object" && arguments.length === 1){
-        productionMode = loggerName.productionMode;
+        productionMode = loggerName.production || loggerName.productionMode; //support fallback
         logDir = loggerName.logDir;
         silence = loggerName.silence;
-        dockerMode = loggerName.dockerMode;
+        dockerMode = loggerName.docker || loggerName.dockerMode; //support fallback
         varKey = loggerName.varKey;
         logFieldOptions = loggerName.logFieldOptions;
         level = loggerName.level || loggerName.logLevel; //support fallback to older key named "logLevel"

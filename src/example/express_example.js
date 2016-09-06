@@ -3,13 +3,13 @@ var request = require("request");
 var log4bro = require("./../../index.js");
 
 var options = {
-    "productionMode": true,
+    "production": true,
     "logDir": "logs",
     "skipEnhance": true,
     "namespace": "",
     "silence": false,
     "loggerName": "dev",
-    "dockerMode": true,
+    "docker": true,
     "varKey": "MLOG",
     "level": "DEBUG",
     "serviceName": "cool-service"
@@ -36,7 +36,7 @@ app.get("/", function (req, res) {
         MLOG.debug("wuuut");
         MLOG.error("this should not be in msg_json");
         res.json({ "_correlationId": req.headers["correlation-id"] });
-    }, 1500);
+    }, 500);
 });
 
 var port = 1337;
@@ -45,5 +45,6 @@ app.listen(port, function(){
 
     request({ "url": "http://localhost:" + port + "/" }, function(err, response, body){
         MLOG.warn(body);
+        process.exit(0);
     });
 });
