@@ -1,7 +1,9 @@
 var fs = require("graceful-fs");
 var chalk = require("chalk");
+var os = require("os");
 
-const CORRELATION_ID = "correlation-id";
+var CORRELATION_ID = "correlation-id";
+var HOST = "host";
 
 /***
  * Stream class that enables bunyan to write custom fields to the log
@@ -26,6 +28,9 @@ function LoggerRawStream(logFile, logFieldOptions, dockerMode) {
     } else {
         this.outStream = process.stdout; //get ref and stop using the getter
     }
+
+    this.dockerMode = dockerMode;
+    this.hostName = os.hostname();
 }
 
 /**
@@ -64,6 +69,14 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
     if (log.time) {
         log["@timestamp"] = _log.time;
         delete log.time;
+    }
+
+    if(!log.host){
+        log.host = this.hostName;
+    }
+
+    if(log.hostname){
+        delete log.hostname;
     }
 
     //remove v:0 field

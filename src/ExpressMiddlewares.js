@@ -1,13 +1,14 @@
 var morgan = require("morgan");
 var uuid = require("uuid");
-var ns = require('continuation-local-storage');
+var ns = require("continuation-local-storage");
+var os = require("os");
 
-const NAMESPACE = "log4bro.ns";
-const CORRELATION_HEADER = "correlation-id";
+var NAMESPACE = "log4bro.ns";
+var CORRELATION_HEADER = "correlation-id";
 
 var ExpressMiddlewares = {}; //static
 
-ExpressMiddlewares.accessLogMiddleware = function (serviceName) {
+ExpressMiddlewares.accessLogMiddleware = function (serviceName, dockerMode) {
 
     serviceName = serviceName || "unknown";
 
@@ -19,12 +20,14 @@ ExpressMiddlewares.accessLogMiddleware = function (serviceName) {
         return request._parsedUrl.query;
     });
 
+    var hostName = os.hostname();
+
     return morgan(
-        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlation-id\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"service\": \"" + serviceName + "\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
+        "{ \"@timestamp\": \":date[iso]\", \"host\": \"" + hostName + "\", \"loglevel\": \"INFO\", \"correlation-id\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"service\": \"" + serviceName + "\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
         {});
 };
 
-ExpressMiddlewares.accessLogMiddlewareFile = function (filePath) {
+ExpressMiddlewares.accessLogMiddlewareFile = function (filePath, dockerMode) {
 
     morgan.token("uri", function getUri(request, response) {
         return request._parsedUrl.pathname;
@@ -35,9 +38,10 @@ ExpressMiddlewares.accessLogMiddlewareFile = function (filePath) {
     });
 
     var accessLogStream = fs.createWriteStream(filePath, {flags: 'a'});
+    var hostName = os.hostname();
 
     return morgan(
-        "{ \"@timestamp\": \":date[iso]\",  \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
+        "{ \"@timestamp\": \":date[iso]\", \"host\": \"" + hostName + "\", \"loglevel\": \"INFO\", \"correlationId\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\", \"remote_address\": \":remote-addr\", \"status\": \":status\", \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\", \"response_time\": \":response-time\" }",
         {stream: accessLogStream});
 };
 

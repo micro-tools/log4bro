@@ -114,7 +114,7 @@ ServiceLogger.prototype.applyMiddlewareAccessLog = function(expressApp){
         throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
     }
 
-    expressApp.use(Middlewares.accessLogMiddleware(this.serviceName));
+    expressApp.use(Middlewares.accessLogMiddleware(this.serviceName, this.dockerMode));
     return expressApp;
 };
 
@@ -138,7 +138,7 @@ ServiceLogger.prototype.applyMiddlewareCorrelationId = function(expressApp){
         throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
     }
 
-    expressApp.use(Middlewares.correlationIdMiddleware(NAMESPACE, CORRELATION_HEADER, this.varKey));
+    expressApp.use(Middlewares.correlationIdMiddleware(NAMESPACE, CORRELATION_HEADER, this.varKey, this.dockerMode));
     return expressApp;
 };
 
