@@ -9,6 +9,7 @@
 - comes batteries included for express.js users (check ./src/examples/express_example.js)
 - auto. access log in ELK format (cout or file)
 - auto. correlation-id header management and logging
+- switch log-level dynamically example: global.LOG.changeLogLevel("INFO");
 
 # simple example
 

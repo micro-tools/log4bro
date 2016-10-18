@@ -50,10 +50,17 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         this.loggerName = loggerName || "prod";
     }
 
-    console.log("[log4bro] Logger is: in-prod=" + this.productionMode +
-        ", in-docker:" + this.dockerMode +
-        ", level=" + this.logLevel +
-        ", skipDebug=" + this.skipDebug);
+    this.LOG = this._createLogger();
+
+    this.LOG.info("[log4bro] Logger is: in-prod=" + this.productionMode +
+    ", in-docker:" + this.dockerMode +
+    ", level=" + this.logLevel +
+    ", skipDebug=" + this.skipDebug);
+
+    this.setGlobal();
+}
+
+ServiceLogger.prototype._createLogger = function(){
 
     var streams = [
         {
@@ -65,7 +72,7 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
 
     if(!this.dockerMode){
 
-        console.log("[log4bro] Logger is not in docker mode.");
+        //console.log("[log4bro] Logger is not in docker mode.");
         this.createLoggingDir();
 
         streams.push({
@@ -75,24 +82,40 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         });
     }
 
-    this.LOG = bunyan.createLogger({
+    return bunyan.createLogger({
         "name": this.loggerName,
         "streams": streams,
         "src": false
     });
+};
 
-    this.setGlobal();
-}
+ServiceLogger.prototype.changeLogLevel = function(level){
+
+    if(level && LOG_LEVELS.indexOf(level) === -1){
+        this.LOG.error("[log4bro] level is not a supported logLevel: " + level + ", defaulting to INFO.");
+        return;
+    }
+
+    if(level === "DEBUG" || level === "TRACE"){
+        this.skipDebug = false;
+    } else {
+        this.skipDebug = true;
+    }
+
+    this.LOG.info("[log4bro] changing loglevel from " + this.logLevel + " to " + level + ".");
+    this.logLevel = level;
+    this.LOG = this._createLogger();
+};
 
 ServiceLogger.prototype.createLoggingDir = function() {
 
     if (!fs.existsSync(this.logDir)) {
-        console.log("[log4bro] Logs folder does not exists creating " + this.logDir + " make sure to set path in blammo.xml.");
+        //console.log("[log4bro] Logs folder does not exists creating " + this.logDir + " make sure to set path in blammo.xml.");
         fs.mkdirSync(this.logDir);
         return;
     }
 
-    console.log("[log4bro] Logs folder exists, clearing " + this.logDir);
+    //console.log("[log4bro] Logs folder exists, clearing " + this.logDir);
 
     var files = null;
     try { files = fs.readdirSync(this.logDir); }
