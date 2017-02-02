@@ -53,3 +53,12 @@ JLOG.error(msg);
 JLOG.fatal(msg);
 
 JLOG.error(options2);
+
+JLOG.raw({
+    gulf: "bulf"
+});
+
+JLOG.raw({
+    gulf: "bulf",
+    service: "wurst-service"
+}, true);

@@ -50,6 +50,7 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
         this.loggerName = loggerName || "prod";
     }
 
+    this._streams = null;
     this.LOG = this._createLogger();
 
     this.LOG.info("[log4bro] Logger is: in-prod=" + this.productionMode +
@@ -62,20 +63,22 @@ function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, 
 
 ServiceLogger.prototype._createLogger = function(){
 
-    var streams = [
+    this._streams = []; //clear
+
+    this._streams.push(
         {
             "type": "raw",
             "level": this.logLevel,
             "stream": new RawStream(null, this.logFieldOptions, this.dockerMode) //will only write to console/stdout
         }
-    ];
+    );
 
     if(!this.dockerMode){
 
         //console.log("[log4bro] Logger is not in docker mode.");
         this.createLoggingDir();
 
-        streams.push({
+        this._streams.push({
             "type": "raw",
             "level": this.logLevel,
             "stream": new RawStream(this.logDir + "/service-log.json", this.logFieldOptions) //will only write to logfile
@@ -84,7 +87,7 @@ ServiceLogger.prototype._createLogger = function(){
 
     return bunyan.createLogger({
         "name": this.loggerName,
-        "streams": streams,
+        "streams": this._streams,
         "src": false
     });
 };
@@ -197,6 +200,25 @@ ServiceLogger.prototype.error = function(message) {
 ServiceLogger.prototype.fatal = function(message) {
     if (this.silence) return;
     this.LOG.fatal(this.enhance(message));
+};
+
+ServiceLogger.prototype.raw = function(messageObject, support){
+
+    if(typeof messageObject !== "object"){
+        throw new Error("Logger.raw(obj) must be called with an object.");
+    }
+
+    if (this.silence) return;
+
+    support = support || false;
+
+    this._streams.forEach(function(stream){
+        if(stream && stream.stream){
+            stream.stream.write(messageObject, support ?
+                RawStream.OVERWRITE_MODES.ADAPT :
+                RawStream.OVERWRITE_MODES.NONE);
+        }
+    });
 };
 
 ServiceLogger.prototype.enhance = function(message) {

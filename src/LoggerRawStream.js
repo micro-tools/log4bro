@@ -3,7 +3,11 @@ var chalk = require("chalk");
 var os = require("os");
 
 var CORRELATION_ID = "correlation-id";
-var HOST = "host";
+var OVERWRITE_MODES = {
+    NONE: "none",
+    ALTER: "alter",
+    ADAPT: "adapt"
+};
 
 /***
  * Stream class that enables bunyan to write custom fields to the log
@@ -31,20 +35,40 @@ function LoggerRawStream(logFile, logFieldOptions, dockerMode) {
 
     this.dockerMode = dockerMode;
     this.hostName = os.hostname();
+    this.pid = process.pid;
+    this.serviceColor = process.env.SERVICE_COLOR;
 }
+
+LoggerRawStream.OVERWRITE_MODES = OVERWRITE_MODES;
 
 /**
  * (stream) write method, called by bunyan
  * @param rec
  */
-LoggerRawStream.prototype.write = function(rec) {
+LoggerRawStream.prototype.write = function(rec, overwriteMode) {
 
     if (typeof rec !== "object") {
         console.log("[log4bro] error: raw stream got a non-object record: %j", rec);
         return;
     }
 
-    rec = this.alterLogFields(rec);
+    overwriteMode = overwriteMode || OVERWRITE_MODES.ALTER;
+
+    switch(overwriteMode){
+
+        case OVERWRITE_MODES.NONE:
+            //none..
+            break;
+
+        case OVERWRITE_MODES.ADAPT:
+            rec = this.adaptLogFields(rec);
+            break;
+
+        case OVERWRITE_MODES.ALTER:
+        default:
+            rec = this.alterLogFields(rec);
+            break;
+    }
 
     this.dockerMode ? this.jsonConsoleOutput(rec) : this.consoleOutput(rec);
 
@@ -56,9 +80,9 @@ LoggerRawStream.prototype.write = function(rec) {
 };
 
 /**
- * alter method were log objects are re-mapped
- * @param log
+ * alter method were log objects are re-mapped (actually re maps bunyan log output)
  * @returns {*}
+ * @param _log
  */
 LoggerRawStream.prototype.alterLogFields = function(_log) {
 
@@ -87,6 +111,10 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
     //remove logger name field
     if(log.name !== null){
         delete log.name;
+    }
+
+    if(!log.current_color){
+        log.current_color = this.serviceColor;
     }
 
     //level -> loglevel_value(int) + loglevel(string)
@@ -120,6 +148,55 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
         for(var i = 0; i < this.logFieldKeys.length; i++){
             log[this.logFieldKeys[i]] = this.logFieldOptions[this.logFieldKeys[i]];
         }
+    }
+
+    return log;
+};
+
+/**
+ * maps any (plain) object
+ * @param _log
+ */
+LoggerRawStream.prototype.adaptLogFields = function(log){
+
+    if(!log["@timestamp"]){
+        log["@timestamp"] = new Date().toISOString();
+    }
+
+    if(!log["host"]){
+        log.host = this.hostName;
+    }
+
+    if(!log.pid){
+        log.pid = this.pid;
+    }
+
+    if(!log.loglevel){
+        log.loglevel = "INFO";
+    }
+
+    if(!log.loglevel_value){
+        log.loglevel_value = 30;
+    }
+
+    if(!log.log_type){
+        log.log_type = "application";
+    }
+
+    if(!log.application_type){
+        log.application_type = "service";
+    }
+
+    if(!log.service && this.logFieldOptions.service){
+        log.service = this.logFieldOptions.service;
+    }
+
+    if(!log.current_color){
+        log.current_color = this.serviceColor;
+    }
+
+    if(!log.msg && !log.msg_json){
+        log.msg = "[log4bro] empty.";
     }
 
     return log;
