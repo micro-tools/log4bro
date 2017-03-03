@@ -1,7 +1,9 @@
 var fs = require("graceful-fs");
 var chalk = require("chalk");
 var os = require("os");
+var ns = require("continuation-local-storage");
 
+var NAMESPACE = "log4bro.ns";
 var CORRELATION_ID = "correlation-id";
 var OVERWRITE_MODES = {
     NONE: "none",
@@ -44,6 +46,7 @@ LoggerRawStream.OVERWRITE_MODES = OVERWRITE_MODES;
 /**
  * (stream) write method, called by bunyan
  * @param rec
+ * @param overwriteMode
  */
 LoggerRawStream.prototype.write = function(rec, overwriteMode) {
 
@@ -58,16 +61,28 @@ LoggerRawStream.prototype.write = function(rec, overwriteMode) {
 
         case OVERWRITE_MODES.NONE:
             //none..
-            break;
+        break;
 
         case OVERWRITE_MODES.ADAPT:
-            rec = this.adaptLogFields(rec);
-            break;
+            try {
+                rec = this.adaptLogFields(rec);
+            } catch(e){
+                process.stdout.write("An exception occured during log field adaption: " +
+                    e.message + ", for message: " + JSON.stringify(rec));
+                return;
+            }
+        break;
 
         case OVERWRITE_MODES.ALTER:
         default:
-            rec = this.alterLogFields(rec);
-            break;
+            try {
+                rec = this.alterLogFields(rec);
+            } catch(e){
+                process.stdout.write("An exception occured during log field alteration: " +
+                    e.message + ", for message: " + JSON.stringify(rec));
+                return;
+            }
+        break;
     }
 
     this.dockerMode ? this.jsonConsoleOutput(rec) : this.consoleOutput(rec);
@@ -82,67 +97,60 @@ LoggerRawStream.prototype.write = function(rec, overwriteMode) {
 /**
  * alter method were log objects are re-mapped (actually re maps bunyan log output)
  * @returns {*}
- * @param _log
+ * @param log
  */
-LoggerRawStream.prototype.alterLogFields = function(_log) {
+LoggerRawStream.prototype.alterLogFields = function(log) {
 
-    //TODO hmm..
-    var log = JSON.parse(JSON.stringify(_log)); //work on copy
+    //log will never be a string since it is coming from bunyan => object
 
-    //time -> @timestamp
-    if (log.time) {
-        log["@timestamp"] = _log.time;
-        delete log.time;
+    var correlationId = null;
+    var namespace = ns.getNamespace(NAMESPACE);
+    if (namespace) {
+        correlationId = namespace.get(CORRELATION_ID);
     }
 
-    if(!log.host){
-        log.host = this.hostName;
+    // remove bunyan fields
+
+    if(log.time){
+        delete log.time;
     }
 
     if(log.hostname){
         delete log.hostname;
     }
 
-    //remove v:0 field
-    if(log.v !== null){
+    if(typeof log.v !== "undefined"){
         delete log.v;
     }
 
-    //remove logger name field
-    if(log.name !== null){
+    if(log.name){
         delete log.name;
     }
 
-    if(!log.current_color){
-        log.current_color = this.serviceColor;
-    }
+    // alter bunyan fields
 
     //level -> loglevel_value(int) + loglevel(string)
     if(log.level !== null){
-        log["loglevel"] = this.levelToName(log.level);
-        log["loglevel_value"] = _log.level;
+        log.loglevel = this.levelToName(log.level);
+        log.loglevel_value = log.level;
         delete log.level;
     }
 
+    // attach new fields
+
+    if(correlationId){
+        log[CORRELATION_ID] = correlationId;
+    }
+
+    // alter message payload (make sure only one of them exist)
+
     var jmsg = this._isJsonString(log.msg);
-    if(jmsg != null){
-        log["msg_json"] = jmsg;
+    if(jmsg !== null){
+        log.msg_json = jmsg;
         delete log.msg;
     }
 
-    //re-locate the correlation-id
-    if(jmsg && !log[CORRELATION_ID] && jmsg[CORRELATION_ID]){
-
-        log[CORRELATION_ID] = jmsg[CORRELATION_ID];
-        delete log.msg_json[CORRELATION_ID];
-
-        //and msg field
-        if(jmsg.msg){
-            log["msg"] = jmsg.msg;
-            jmsg = null;
-            delete log.msg_json.msg;
-        }
-    }
+    // set static log field keys
 
     if(this.logFieldKeys){
         for(var i = 0; i < this.logFieldKeys.length; i++){
@@ -150,12 +158,14 @@ LoggerRawStream.prototype.alterLogFields = function(_log) {
         }
     }
 
-    return log;
+    // ensure minimum validity of log object
+
+    return this.adaptLogFields(log);
 };
 
 /**
  * maps any (plain) object
- * @param _log
+ * @param log
  */
 LoggerRawStream.prototype.adaptLogFields = function(log){
 
@@ -187,7 +197,7 @@ LoggerRawStream.prototype.adaptLogFields = function(log){
         log.application_type = "service";
     }
 
-    if(!log.service && this.logFieldOptions.service){
+    if(!log.service && this.logFieldOptions && this.logFieldOptions.service){
         log.service = this.logFieldOptions.service;
     }
 
@@ -195,8 +205,12 @@ LoggerRawStream.prototype.adaptLogFields = function(log){
         log.current_color = this.serviceColor;
     }
 
-    if(!log.msg && !log.msg_json){
+    if(typeof log.msg === "undefined" && !log.msg_json){
         log.msg = "[log4bro] empty.";
+    }
+
+    if(typeof log.msg !== "undefined" && log.msg_json){
+        delete log.msg;
     }
 
     return log;

@@ -1,13 +1,12 @@
 var fs = require("fs");
 var bunyan = require("bunyan");
-var ns = require('continuation-local-storage');
 
 var RawStream = require("./LoggerRawStream.js");
 var Middlewares = require("./ExpressMiddlewares.js");
 
-const NAMESPACE = "log4bro.ns";
-const CORRELATION_HEADER = "correlation-id";
 const LOG_LEVELS = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
+var NAMESPACE = "log4bro.ns";
+var CORRELATION_ID = "correlation-id";
 
 function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, level, serviceName) {
 
@@ -164,7 +163,7 @@ ServiceLogger.prototype.applyMiddlewareCorrelationId = function(expressApp){
         throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
     }
 
-    expressApp.use(Middlewares.correlationIdMiddleware(NAMESPACE, CORRELATION_HEADER, this.varKey, this.dockerMode));
+    expressApp.use(Middlewares.correlationIdMiddleware(NAMESPACE, CORRELATION_ID, this.varKey, this.dockerMode));
     return expressApp;
 };
 
@@ -174,32 +173,47 @@ ServiceLogger.prototype.setGlobal = function() {
 
 ServiceLogger.prototype.trace = function(message) {
     if (this.skipDebug) return; //safe memory & cpu
-    this.LOG.trace(this.enhance(message));
+    this.LOG.trace(this._moveMsgObject(message));
 };
 
 ServiceLogger.prototype.debug = function(message) {
     if (this.skipDebug) return; //safe memory & cpu
-    this.LOG.debug(this.enhance(message));
+    this.LOG.debug(this._moveMsgObject(message));
 };
 
 ServiceLogger.prototype.info = function(message) {
     if (this.silence) return;
-    this.LOG.info(this.enhance(message));
+    this.LOG.info(this._moveMsgObject(message));
 };
 
 ServiceLogger.prototype.warn = function(message) {
     if (this.silence) return;
-    this.LOG.warn(this.enhance(message));
+    this.LOG.warn(this._moveMsgObject(message));
 };
 
 ServiceLogger.prototype.error = function(message) {
     if (this.silence) return;
-    this.LOG.error(this.enhance(message));
+    this.LOG.error(this._moveMsgObject(message));
 };
 
 ServiceLogger.prototype.fatal = function(message) {
     if (this.silence) return;
-    this.LOG.fatal(this.enhance(message));
+    this.LOG.fatal(this._moveMsgObject(message));
+};
+
+ServiceLogger.prototype._moveMsgObject = function(message){
+
+    // identify if dealing with an object or string message
+    // move an object to the msg_json field that can be index by ELK
+    // do nothing if dealing with a string
+    // it is important to run this step before the message touches bunyan
+    if(typeof message === "object"){
+        message = {
+            msg_json: message
+        };
+    }
+
+    return message;
 };
 
 ServiceLogger.prototype.raw = function(messageObject, support){
@@ -219,36 +233,6 @@ ServiceLogger.prototype.raw = function(messageObject, support){
                 RawStream.OVERWRITE_MODES.NONE);
         }
     });
-};
-
-ServiceLogger.prototype.enhance = function(message) {
-    /* enhance */
-
-    var correlationId = null;
-    var namespace = ns.getNamespace(NAMESPACE);
-    if (namespace) {
-        correlationId = namespace.get(CORRELATION_HEADER);
-    }
-
-    if(typeof message === "object"){
-
-        if (correlationId) {
-            message["correlation-id"] = correlationId;
-        }
-
-        if(Object.keys(message).length <= 15){
-            message = JSON.stringify(message);
-        } else {
-            message = "[Object object, with more than 15 keys.]";
-        }
-    } else {
-        
-        if(correlationId){
-            message = JSON.stringify({ "correlation-id": correlationId, "msg": message });
-        }
-    }
-
-    return message;
 };
 
 module.exports = ServiceLogger;
