@@ -100,10 +100,13 @@ ExpressMiddlewares.accessLogMiddleware = function (serviceName, dockerMode) {
         }
     });
 
+    /*
     morgan.token("bytes_sent", function getBytesSent(request, response){
-        return 0;
+        return "0";
     });
+    */
 
+    /*
     return morgan(
         "{ \"@timestamp\": \":date[iso]\", \"host\": \":host_name\", \"loglevel\": \"INFO\"," +
         " \"correlation-id\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\"," +
@@ -112,6 +115,17 @@ ExpressMiddlewares.accessLogMiddleware = function (serviceName, dockerMode) {
         " \"response_time\": \":response-time\", \"protocol\": \":protocol\", \"server_name\": \":server_name\"," +
         " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\", " +
         " \"bytes_received\": \":bytes_received\", \"bytes_sent\": \":bytes_sent\" }",
+        {});
+    */
+
+    return morgan(
+        "{ \"@timestamp\": \":date[iso]\", \"host\": \":host_name\", \"loglevel\": \"INFO\"," +
+        " \"correlation-id\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\"," +
+        " \"service\": \":service_name\", \"remote_address\": \":remote-addr\", \"status\": \":status\"," +
+        " \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\"," +
+        " \"response_time\": \":response-time\", \"protocol\": \":protocol\", \"server_name\": \":server_name\"," +
+        " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\", " +
+        " \"bytes_received\": \":bytes_received\" }",
         {});
 };
 
