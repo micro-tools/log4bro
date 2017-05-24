@@ -1,6 +1,6 @@
 # log4bro
 
-
+[![Build Status](https://travis-ci.org/micro-tools/log4bro.svg?branch=master)](https://travis-ci.org/micro-tools/log4bro)
 
 - log4bro makes it hassle free to have compliant microservice ELK stack log behaviour
 - just require & init and log via global variable in a few seconds
