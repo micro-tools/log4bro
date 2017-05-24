@@ -1,5 +1,4 @@
 var log4bro = require("./../../index.js");
-var ns = require("continuation-local-storage");
 
 new log4bro({
     "productionMode": true,
@@ -17,21 +16,14 @@ new log4bro({
     "level": "DEBUG"
 });
 
-var nsp = "log4bro.ns";
-var space = ns.getNamespace(nsp);
-if(!space) {
-    space = ns.createNamespace(nsp);
-}
+const testLogger = TLOG.createChild({"correlation-id": "i-am-a-correlation-id"});
 
 console.log();
 
-space.run(function () {
-    space.set("correlation-id", "i-am-a-correlation-id");
-    TLOG.warn({ an: "object"});
-    TLOG.warn("ich bin ein leerer string");
-});
+testLogger.warn({ an: "object"});
+testLogger.warn("I am an empty string");
 
 console.log();
 
 TLOG.debug({ an: "object"});
-TLOG.error("ich bin ein leerer string");
+TLOG.error("I am an empty string");

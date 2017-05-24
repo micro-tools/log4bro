@@ -1,3 +1,4 @@
+var uuid = require("uuid");
 var express = require("express");
 var request = require("request");
 var log4bro = require("./../../index.js");
@@ -18,12 +19,6 @@ var options = {
 var logger = new log4bro(options);
 var app = express();
 
-//#run namespaceing middleware to attach or forward correlation-id on incoming http-requests
-//#they will be automatically logged on all logs that occure during that request in your service
-//#expected header is: "correlation-id"
-//#if header is missing, it will be set using a generated uuid (v4), will cause debug logs
-logger.applyMiddlewareCorrelationId(app);
-
 //#log an elk formatted access log to cout
 logger.applyMiddlewareAccessLog(app);
 
@@ -31,10 +26,14 @@ logger.applyMiddlewareAccessLog(app);
 //log4bro.applyMiddlewareAccessLogFile(app, "./access_log.json");
 
 app.get("/", function (req, res) {
+    if (!req.headers["correlation-id"]) {
+        req.headers["correlation-id"] = uuid.v4();
+    }
+    const reqLogger = MLOG.createChild({"correlation-id" : req.headers["correlation-id"]})
     setTimeout(function(){
-        MLOG.debug("debug - wuuut");
-        MLOG.info("info - yeah broooo..");
-        MLOG.error("error - this should not be in msg_json");
+        reqLogger.debug("debug - wuuut");
+        reqLogger.info("info - yeah broooo..");
+        reqLogger.error("error - this should not be in msg_json");
         res.json({ "_correlationId": req.headers["correlation-id"] });
     }, 500);
 });

@@ -18,9 +18,7 @@
     "microservice logging",
     "logging",
     "log4bro",
-    "access log",
-    "correlation id",
-    "correlation-id"
+    "access log"
   ],
   "author": "Christian Fröhlingsdorf <chris@5cf.de>",
   "license": "MIT",

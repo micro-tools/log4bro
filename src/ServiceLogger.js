@@ -5,8 +5,6 @@ var RawStream = require("./LoggerRawStream.js");
 var Middlewares = require("./ExpressMiddlewares.js");
 
 const LOG_LEVELS = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
-var NAMESPACE = "log4bro.ns";
-var CORRELATION_ID = "correlation-id";
 
 function ServiceLogger(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, level, serviceName) {
 
@@ -91,6 +89,18 @@ ServiceLogger.prototype._createLogger = function(){
     });
 };
 
+ServiceLogger.prototype.createChild = function(additionalFields) {
+    const that = this;
+    return {
+        trace: function (message) { that._trace(message, additionalFields) },
+        debug: function (message) { that._debug(message, additionalFields) } ,
+        info: function (message) { that._info(message, additionalFields) },
+        warn: function (message) { that._warn(message, additionalFields) },
+        error: function (message) { that._error(message, additionalFields) },
+        fatal: function (message) { that._fatal(message, additionalFields) }
+    }
+};
+
 ServiceLogger.prototype.changeLogLevel = function(level){
 
     if(level && LOG_LEVELS.indexOf(level) === -1){
@@ -157,51 +167,65 @@ ServiceLogger.prototype.applyMiddlewareAccessLogFile = function(expressApp, logF
     return expressApp;
 };
 
-ServiceLogger.prototype.applyMiddlewareCorrelationId = function(expressApp){
-
-    if(!expressApp || typeof expressApp !== "function"){
-        throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
-    }
-
-    expressApp.use(Middlewares.correlationIdMiddleware(NAMESPACE, CORRELATION_ID, this.varKey, this.dockerMode));
-    return expressApp;
-};
-
 ServiceLogger.prototype.setGlobal = function() {
     global[this.varKey] = this;
 };
 
+ServiceLogger.prototype._trace = function(message, additionalFields) {
+    if (this.skipDebug) return; //save memory & cpu
+    this._moveMsgObject("trace", message, additionalFields);
+};
+
+ServiceLogger.prototype._debug = function(message, additionalFields) {
+    if (this.skipDebug) return; //save memory & cpu
+    this._moveMsgObject("debug", message, additionalFields);
+};
+
+ServiceLogger.prototype._info = function(message, additionalFields) {
+    if (this.silence) return;
+    this._moveMsgObject("info", message, additionalFields);
+};
+
+ServiceLogger.prototype._warn = function(message, additionalFields) {
+    if (this.silence) return;
+    this._moveMsgObject("warn", message, additionalFields);
+};
+
+ServiceLogger.prototype._error = function(message, additionalFields) {
+    if (this.silence) return;
+    this._moveMsgObject("error", message, additionalFields);
+};
+
+ServiceLogger.prototype._fatal = function(message, additionalFields) {
+    if (this.silence) return;
+    this._moveMsgObject("fatal", message, additionalFields);
+};
+
 ServiceLogger.prototype.trace = function(message) {
-    if (this.skipDebug) return; //safe memory & cpu
-    this.LOG.trace(this._moveMsgObject(message));
+    this._trace(message);
 };
 
 ServiceLogger.prototype.debug = function(message) {
-    if (this.skipDebug) return; //safe memory & cpu
-    this.LOG.debug(this._moveMsgObject(message));
+    this._debug(message);
 };
 
 ServiceLogger.prototype.info = function(message) {
-    if (this.silence) return;
-    this.LOG.info(this._moveMsgObject(message));
+    this._info(message);
 };
 
 ServiceLogger.prototype.warn = function(message) {
-    if (this.silence) return;
-    this.LOG.warn(this._moveMsgObject(message));
+    this._warn(message);
 };
 
 ServiceLogger.prototype.error = function(message) {
-    if (this.silence) return;
-    this.LOG.error(this._moveMsgObject(message));
+    this._error(message);
 };
 
 ServiceLogger.prototype.fatal = function(message) {
-    if (this.silence) return;
-    this.LOG.fatal(this._moveMsgObject(message));
+    this._fatal(message);
 };
 
-ServiceLogger.prototype._moveMsgObject = function(message){
+ServiceLogger.prototype._moveMsgObject = function(level, message, additionalFields = {}){
 
     // identify if dealing with an object or string message
     // move an object to the msg_json field that can be index by ELK
@@ -211,9 +235,12 @@ ServiceLogger.prototype._moveMsgObject = function(message){
         message = {
             msg_json: message
         };
+
+        Object.assign(message, additionalFields);
+        return this.LOG[level](message);
     }
 
-    return message;
+    return this.LOG[level](additionalFields, message);
 };
 
 ServiceLogger.prototype.raw = function(messageObject, support){
