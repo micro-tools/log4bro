@@ -1,7 +1,7 @@
 var uuid = require("uuid");
 var express = require("express");
 var request = require("request");
-var log4bro = require("./../../index.js");
+var log4bro = require("../index.js");
 
 var options = {
     "production": true,

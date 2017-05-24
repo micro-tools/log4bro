@@ -1,4 +1,4 @@
-var log4bro = require("./../../index.js");
+var log4bro = require("../index.js");
 
 new log4bro({
     "productionMode": true,
