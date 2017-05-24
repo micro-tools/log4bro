@@ -25,5 +25,12 @@ testLogger.warn("I am an empty string");
 
 console.log();
 
+const emptyFieldsLogger = TLOG.createChild();
+
+emptyFieldsLogger.info({ an: "object" });
+emptyFieldsLogger.info("I am an empty string");
+
+console.log();
+
 TLOG.debug({ an: "object"});
 TLOG.error("I am an empty string");
