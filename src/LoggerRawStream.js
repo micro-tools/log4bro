@@ -1,10 +1,7 @@
 var fs = require("graceful-fs");
 var chalk = require("chalk");
 var os = require("os");
-var ns = require("continuation-local-storage");
 
-var NAMESPACE = "log4bro.ns";
-var CORRELATION_ID = "correlation-id";
 var OVERWRITE_MODES = {
     NONE: "none",
     ALTER: "alter",
@@ -103,12 +100,6 @@ LoggerRawStream.prototype.alterLogFields = function(log) {
 
     //log will never be a string since it is coming from bunyan => object
 
-    var correlationId = null;
-    var namespace = ns.getNamespace(NAMESPACE);
-    if (namespace) {
-        correlationId = namespace.get(CORRELATION_ID);
-    }
-
     // remove bunyan fields
 
     if(log.time){
@@ -134,12 +125,6 @@ LoggerRawStream.prototype.alterLogFields = function(log) {
         log.loglevel = this.levelToName(log.level);
         log.loglevel_value = log.level;
         delete log.level;
-    }
-
-    // attach new fields
-
-    if(correlationId){
-        log[CORRELATION_ID] = correlationId;
     }
 
     // alter message payload (make sure only one of them exist)

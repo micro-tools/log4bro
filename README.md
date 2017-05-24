@@ -8,7 +8,6 @@
 - node + docker + log4bro = happy you, happy ELK stack and happy sysops
 - comes batteries included for express.js users (check ./src/examples/express_example.js)
 - auto. access log in ELK format (cout or file)
-- auto. correlation-id header management and logging
 - switch log-level dynamically example: global.LOG.changeLogLevel("INFO");
 
 # simple example
@@ -104,7 +103,7 @@ JLOG.fatal(msg);
 JLOG.error(options2);
 ```
 
-# auto express.js access log + correlation-id logging
+# auto express.js access log logging
 
 ```javascript
 var express = require("express");
@@ -131,12 +130,6 @@ logger.applyMiddlewareAccessLog(app);
 
 //log an elk formatted access log to a file
 logger.applyMiddlewareAccessLogFile(app, "./access_log.json");
-
-//run namespaceing middleware to attach or forward correlation-id on incoming http-requests
-//they will be automatically logged on all logs that occure during that request in your service
-//expected header is: "correlation-id"
-//if header is missing, it will be set using a generated uuid (v4), will cause debug logs
-logger.applyMiddlewareCorrelationId(app);
 ```
 
 - enjoy.. need help? contact me.. @krystianity or on twitter: @silentleave
