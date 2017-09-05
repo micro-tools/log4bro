@@ -89,15 +89,15 @@ class ServiceLogger {
         });
     }
 
-    createChild(additionalFields) {
+    createChild(defaultAdditionalFields) {
         const self = this;
         return {
-            trace: message => self.trace(message, additionalFields),
-            debug: message => self.debug(message, additionalFields),
-            info: message => self.info(message, additionalFields),
-            warn: message => self.warn(message, additionalFields),
-            error: message => self.error(message, additionalFields),
-            fatal: message => self.fatal(message, additionalFields)
+            trace: (message, additionalFields) => self.trace(message, Object.assign({}, additionalFields, defaultAdditionalFields)),
+            debug: (message, additionalFields) => self.debug(message, Object.assign({}, additionalFields, defaultAdditionalFields)),
+            info: (message, additionalFields) => self.info(message, Object.assign({}, additionalFields, defaultAdditionalFields)),
+            warn: (message, additionalFields) => self.warn(message, Object.assign({}, additionalFields, defaultAdditionalFields)),
+            error: (message, additionalFields) => self.error(message, Object.assign({}, additionalFields, defaultAdditionalFields)),
+            fatal: (message, additionalFields) => self.fatal(message, Object.assign({}, additionalFields, defaultAdditionalFields))
         }
     }
 
