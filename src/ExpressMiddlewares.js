@@ -20,7 +20,6 @@ class ExpressMiddlewares {
         // Check for additional access logs
         if (opts && typeof opts === "object") {
           for (const key in opts) {
-            console.log(key);
             try {
               morgan.token(key, typeof opts[key] === "function" ? opts[key] : errorHandler);
             }
