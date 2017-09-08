@@ -139,13 +139,13 @@ class ServiceLogger {
             }
     }
 
-    applyMiddlewareAccessLog(expressApp) {
+    applyMiddlewareAccessLog(expressApp, opts) {
 
         if(!expressApp || typeof expressApp !== "function"){
             throw new Error("[log4bro] ExpressApp is null or not an object, make sure you pass an instance of express() to applyMiddleware.");
         }
 
-        expressApp.use(Middlewares.accessLogMiddleware(this.serviceName, this.dockerMode));
+        expressApp.use(Middlewares.accessLogMiddleware(this.serviceName, this.dockerMode, opts));
         return expressApp;
     }
 
