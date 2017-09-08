@@ -15,21 +15,20 @@ class ExpressMiddlewares {
         const hostName = os.hostname();
         const serviceColor = process.env.SERVICE_COLOR || "unknown";
         const errorHandler = (request, response) => "error";
-        let optKeys = [];
-        let optKeysString = '';
+        const optKeys = [];
 
         // Check for additional access logs
-        if (opts && typeof opts === 'object') {
-          Object.keys(opts).forEach((key) => {
+        if (opts && typeof opts === "object") {
+          for (const key in opts) {
+            console.log(key);
             try {
-              morgan.token(key, typeof opts[key] === 'function' ? opts[key] : errorHandler);
+              morgan.token(key, typeof opts[key] === "function" ? opts[key] : errorHandler);
             }
             catch(err) {
               morgan.token(key, errorHandler);
             }
             optKeys.push(`\"${key}\": \":${key}\"`);
-          });
-          optKeysString = optKeys.length > 0 ? `${optKeys.join()},` : optKeysString;
+          }
         }
 
         morgan.token("host_name", function getHostName(request, response) {
@@ -123,7 +122,7 @@ class ExpressMiddlewares {
             " \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\"," +
             " \"response_time\": \":response-time\", \"protocol\": \":protocol\", \"server_name\": \":server_name\"," +
             " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\", " +
-            optKeysString + " \"bytes_received\": \":bytes_received\" }",
+            `${optKeys.length ? optKeys.join() + ',' : optKeys.join()}` + " \"bytes_received\": \":bytes_received\" }",
             {});
     }
 
