@@ -9,11 +9,26 @@ const AUTH_INFO_USER_ID = "auth-info-user-id";
 
 class ExpressMiddlewares {
 
-    static accessLogMiddleware(serviceName, dockerMode) {
+    static accessLogMiddleware(serviceName, dockerMode, opts) {
 
         serviceName = serviceName || "unknown";
         const hostName = os.hostname();
         const serviceColor = process.env.SERVICE_COLOR || "unknown";
+        const errorHandler = (request, response) => "error";
+        const optKeys = [];
+
+        // Check for additional access logs
+        if (opts && typeof opts === "object") {
+          for (const key in opts) {
+            try {
+              morgan.token(key, typeof opts[key] === "function" ? opts[key] : errorHandler);
+            }
+            catch(err) {
+              morgan.token(key, errorHandler);
+            }
+            optKeys.push(`\"${key}\": \":${key}\"`);
+          }
+        }
 
         morgan.token("host_name", function getHostName(request, response) {
             return hostName;
@@ -106,7 +121,7 @@ class ExpressMiddlewares {
             " \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\"," +
             " \"response_time\": \":response-time\", \"protocol\": \":protocol\", \"server_name\": \":server_name\"," +
             " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\", " +
-            " \"bytes_received\": \":bytes_received\" }",
+            `${optKeys.length ? " " + optKeys.join(", ") + "," : ""}` + " \"bytes_received\": \":bytes_received\" }",
             {});
     }
 
