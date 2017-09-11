@@ -121,7 +121,7 @@ class ExpressMiddlewares {
             " \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\"," +
             " \"response_time\": \":response-time\", \"protocol\": \":protocol\", \"server_name\": \":server_name\"," +
             " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\", " +
-            `${optKeys.length ? " " + optKeys.join(", ") + "," : ""}` + " \"bytes_received\": \":bytes_received\" }",
+            `${optKeys.length ? optKeys.join(", ") + "," : ""}` + " \"bytes_received\": \":bytes_received\" }",
             {});
     }
 

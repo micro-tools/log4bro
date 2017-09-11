@@ -20,7 +20,11 @@ var logger = new log4bro(options);
 var app = express();
 
 //#log an elk formatted access log to cout
-logger.applyMiddlewareAccessLog(app);
+logger.applyMiddlewareAccessLog(app, {
+    rjm: (req, res) => {
+        return "hi-test";
+    }
+});
 
 //#log an elk formatted access log to a file
 //log4bro.applyMiddlewareAccessLogFile(app, "./access_log.json");
