@@ -210,8 +210,12 @@ class ServiceLogger {
         const {child, wrapped} = additionalFields;
 
         if (this.caller) {
-          const index = 3 + (child ? 1 : 0) + (wrapped ? 1: 0);
-          additionalFields.caller = new Error().stack.split("\n")[index].trim();
+          try {
+            const index = 3 + (child ? 1 : 0) + (wrapped ? 1: 0);
+            additionalFields.caller = new Error().stack.split("\n")[index].trim();
+          } catch(err) {
+            additionalFields.caller = "error";
+          }
         }
 
         child && delete additionalFields.child;
