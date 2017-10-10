@@ -10,7 +10,7 @@ const Middlewares = require("./ExpressMiddlewares.js");
 const LOG_LEVELS = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
 
 class ServiceLogger {
-    constructor(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, level, serviceName, stackdriver) {
+    constructor(loggerName, silence, logDir, productionMode, dockerMode, varKey, logFieldOptions, level, serviceName, caller, stackdriver) {
 
         if(typeof loggerName === "object" && arguments.length === 1){
             productionMode = loggerName.production || loggerName.productionMode; //support fallback
@@ -21,6 +21,8 @@ class ServiceLogger {
             logFieldOptions = loggerName.logFieldOptions;
             level = loggerName.level || loggerName.logLevel; //support fallback to older key named "logLevel"
             serviceName = loggerName.serviceName;
+            stackdriver = loggerName.stackdriver;
+            caller = loggerName.caller;
             stackdriver = loggerName.stackdriver;
 
             loggerName = loggerName.name; //last
@@ -40,6 +42,7 @@ class ServiceLogger {
         this.logLevel = level || (productionMode ? "WARN" : "DEBUG"); //level -> logLevel (dockerconfig cannot set camelcase)
         this.serviceName = serviceName || "undefined";
         this.stackdriver = stackdriver;
+        this.caller = caller || false;
 
         this.skipDebug = this.silence || (this.productionMode &&
             !(this.logLevel === "TRACE" || this.logLevel === "DEBUG"));
@@ -155,8 +158,9 @@ class ServiceLogger {
 
     }
 
-    createChild(defaultAdditionalFields) {
+    createChild(defaultAdditionalFields = {}) {
         const self = this;
+        defaultAdditionalFields.child = true;
         return {
             trace: (message, additionalFields) => self.trace(message, Object.assign({}, additionalFields, defaultAdditionalFields)),
             debug: (message, additionalFields) => self.debug(message, Object.assign({}, additionalFields, defaultAdditionalFields)),
@@ -269,6 +273,21 @@ class ServiceLogger {
         // move an object to the msg_json field that can be index by ELK
         // do nothing if dealing with a string
         // it is important to run this step before the message touches bunyan
+
+        const {child, wrapped} = additionalFields;
+
+        if (this.caller) {
+          try {
+            const index = 3 + (child ? 1 : 0) + (wrapped ? 1: 0);
+            additionalFields.caller = new Error().stack.split("\n")[index].trim();
+          } catch(err) {
+            additionalFields.caller = "error";
+          }
+        }
+
+        child && delete additionalFields.child;
+        wrapped && delete additionalFields.wrapped;
+
         if(typeof message === "object"){
             message = {
                 msg_json: message

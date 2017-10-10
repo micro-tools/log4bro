@@ -6,6 +6,7 @@ new log4bro({
     "silence": false,
     "loggerName": "dev",
     "dockerMode": true,
+    "caller": true,
     "varKey": "TLOG",
     "logFieldOptions": {
         "log_type": "application",
