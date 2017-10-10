@@ -35,6 +35,7 @@ var options2 = {
     "silence": false,
     "loggerName": "dev",
     "dockerMode": true,
+    "caller": true,
     "varKey": "JLOG",
     "logFieldOptions": {
         "log_type": "application",
