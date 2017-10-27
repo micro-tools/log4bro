@@ -1,6 +1,6 @@
 {
   "name": "log4bro",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "easy ELK logger with compliant output format, based on bunyan.",
   "main": "index.js",
   "scripts": {
