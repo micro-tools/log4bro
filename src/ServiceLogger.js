@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const bunyan = require("bunyan");
-const googleBunyan = require("@google-cloud/logging-bunyan");
+let googleBunyan = null;
 
 const RawStream = require("./LoggerRawStream.js");
 const Middlewares = require("./ExpressMiddlewares.js");
@@ -96,7 +96,6 @@ class ServiceLogger {
             ", skipDebug=" + this.skipDebug);
 
         this.setGlobal();
-
     }
 
     _createGoogleLogger() {
@@ -104,6 +103,10 @@ class ServiceLogger {
       let logger;
 
       try {
+
+        if(!googleBunyan){
+            googleBunyan = require("@google-cloud/logging-bunyan");
+        }
 
         logger = bunyan.createLogger({
           "name": this.loggerName,
