@@ -114,6 +114,21 @@ class ExpressMiddlewares {
             }
         });
 
+        morgan.token("user_agent", function getUserAgent(request, response) {
+            try {
+                const userAgent = request.headers["user-agent"];
+                if (typeof userAgent === "string") {
+                    return userAgent;
+                }
+                if (Array.isArray(userAgent) && userAgent.length > 0) {
+                    return userAgent[0];
+                }
+                return "";
+            } catch (e) {
+                return "error";
+            }
+        });
+
         return morgan(
             "{ \"@timestamp\": \":date[iso]\", \"host\": \":host_name\", \"loglevel\": \"INFO\"," +
             " \"correlation-id\": \":req[correlation-id]\", \"application_type\": \"service\", \"log_type\": \"access\"," +
@@ -121,6 +136,7 @@ class ExpressMiddlewares {
             " \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\"," +
             " \"response_time\": \":response-time\", \"protocol\": \":protocol\", \"server_name\": \":server_name\"," +
             " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\", " +
+            " \"user_agent\": \":user_agent\", " +
             `${optKeys.length ? optKeys.join(", ") + "," : ""}` + " \"bytes_received\": \":bytes_received\" }",
             {});
     }
