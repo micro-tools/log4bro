@@ -135,7 +135,7 @@ class ExpressMiddlewares {
             " \"service\": \":service_name\", \"remote_address\": \":remote-addr\", \"status\": \":status\"," +
             " \"request_method\": \":method\", \"uri\": \":uri\", \"query_string\": \":query_string\"," +
             " \"response_time\": \":response-time\", \"protocol\": \":protocol\", \"server_name\": \":server_name\"," +
-            " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\", " +
+            " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\"," +
             " \"user_agent\": \":user_agent\", " +
             `${optKeys.length ? optKeys.join(", ") + "," : ""}` + " \"bytes_received\": \":bytes_received\" }",
             {});
