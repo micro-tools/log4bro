@@ -131,7 +131,7 @@ class LoggerRawStream {
         // alter message payload (make sure only one of them exist)
 
         const jmsg = LoggerRawStream._isJsonString(log.msg);
-        if(jmsg !== null){
+        if(typeof jmsg === "object" && jmsg !== null){
             log.msg_json = jmsg;
             delete log.msg;
         }
