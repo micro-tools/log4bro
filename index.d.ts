@@ -1,7 +1,7 @@
-import * as bunyan from "bunyan";
+import bunyan = require("bunyan");
 import { Application } from "express";
 
-namespace ServiceLogger {
+declare namespace ServiceLogger {
     export interface ILog4broOptions {
         productionMode?: boolean;
         logDir?: string;
@@ -17,7 +17,7 @@ namespace ServiceLogger {
         loggerName?: string;
     }
 }
-class ServiceLogger {
+declare class ServiceLogger {
     productionMode: boolean;
     varKey: string;
     dockerMode: boolean;
