@@ -1,6 +1,12 @@
 import bunyan = require("bunyan");
 import { Application } from "express";
 
+interface ILogFieldOptions {
+    application_type?: string;
+    log_type?: string;
+    service?: string;
+}
+
 declare namespace ServiceLogger {
     export interface ILog4broOptions {
         productionMode?: boolean;
@@ -8,7 +14,7 @@ declare namespace ServiceLogger {
         silence?: boolean;
         dockerMode?: boolean;
         varKey?: string;
-        logFieldOptions?: string[];
+        logFieldOptions?: ILogFieldOptions;
         level?: string;
         logLevel?: string;
         serviceName?: string;
@@ -17,11 +23,12 @@ declare namespace ServiceLogger {
         loggerName?: string;
     }
 }
+
 declare class ServiceLogger {
     productionMode: boolean;
     varKey: string;
     dockerMode: boolean;
-    logFieldOptions: string[];
+    logFieldOptions: ILogFieldOptions;
     silence: boolean;
     logDir: string;
     logLevel: string;
@@ -40,7 +47,7 @@ declare class ServiceLogger {
                 productionMode: boolean,
                 dockerMode: boolean,
                 varKey: string,
-                logFieldOptions: string[],
+                logFieldOptions: ILogFieldOptions,
                 level: string,
                 serviceName: string,
                 caller: string,
@@ -62,4 +69,5 @@ declare class ServiceLogger {
     fatal(message: string, additionalFields?: any): void;
     raw(message: any, support?: boolean): void;
 }
+
 export = ServiceLogger;
