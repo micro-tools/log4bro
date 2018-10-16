@@ -34,6 +34,9 @@ LOG.info("bla");
 LOG.warn("bla");
 LOG.error("bla");
 LOG.fatal("bla");
+
+const someParam = "any old variable";
+LOG.info(`foo happned with parameter ${someParam}`);
 ```
 
 [Read More Here](docs/more.md)
