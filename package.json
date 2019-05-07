@@ -1,6 +1,6 @@
 {
   "name": "log4bro",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "easy ELK logger with compliant output format, based on bunyan.",
   "main": "index.js",
   "scripts": {
@@ -32,8 +32,6 @@
   },
   "homepage": "https://github.com/micro-tools/log4bro",
   "dependencies": {
-    "@types/bunyan": "^1.8.5",
-    "@types/express": "^4.16.0",
     "bunyan": "~1.8.12",
     "chalk": "~2.4.2",
     "graceful-fs": "~4.1.15",
@@ -44,9 +42,11 @@
     "express": "^4.16.4",
     "intercept-stdout": "~0.1.2",
     "istanbul": "~0.4.5",
-    "mocha": "~5.2.0"
+    "mocha": "~6.1.4",
+    "@types/bunyan": "^1.8.6",
+    "@types/express": "^4.16.1"
   },
   "optionalDependencies": {
-    "@google-cloud/logging-bunyan": "^0.9.5"
+    "@google-cloud/logging-bunyan": "^0.10.1"
   }
 }
