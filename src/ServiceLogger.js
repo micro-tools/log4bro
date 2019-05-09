@@ -262,6 +262,10 @@ class ServiceLogger {
 
     error(message, additionalFields) {
         if (this.silence) return;
+        if (message instanceof Error) {
+            this._moveMsgObject("error", message.message, Object.assign({}, message, {stack: message.stack}, additionalFields));
+            return;
+        }
         this._moveMsgObject("error", message, additionalFields);
     }
 
