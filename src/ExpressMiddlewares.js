@@ -19,15 +19,15 @@ class ExpressMiddlewares {
 
         // Check for additional access logs
         if (opts && typeof opts === "object") {
-          for (const key in opts) {
-            try {
-              morgan.token(key, typeof opts[key] === "function" ? opts[key] : errorHandler);
+            for (const key in opts) {
+                try {
+                    morgan.token(key, typeof opts[key] === "function" ? opts[key] : errorHandler);
+                }
+                catch(err) {
+                    morgan.token(key, errorHandler);
+                }
+                optKeys.push(`\"${key}\": \":${key}\"`);
             }
-            catch(err) {
-              morgan.token(key, errorHandler);
-            }
-            optKeys.push(`\"${key}\": \":${key}\"`);
-          }
         }
 
         morgan.token("host_name", function getHostName(request, response) {
