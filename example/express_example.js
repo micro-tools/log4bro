@@ -20,11 +20,19 @@ var logger = new log4bro(options);
 var app = express();
 
 //#log an elk formatted access log to cout
-logger.applyMiddlewareAccessLog(app, {
+logger.applyMiddlewareAccessLog(
+  app,
+  {
     rjm: (req, res) => {
-        return "hi-test";
+      return "hi-test";
     }
-});
+  },
+  {
+    skip: (req, res) => {
+      return req.url === "/dont-log-this-url";
+    }
+  }
+);
 
 //#log an elk formatted access log to a file
 //log4bro.applyMiddlewareAccessLogFile(app, "./access_log.json");
@@ -55,7 +63,7 @@ app.listen(port, function(){
 
             MLOG.changeLogLevel("DEBUG");
 
-            request({ "url": "http://localhost:" + port + "/" }, function(err, response, body){
+            request({ "url": "http://localhost:" + port + "/dont-log-this-url" }, function(err, response, body){
                 process.exit(0);
             });
         });
