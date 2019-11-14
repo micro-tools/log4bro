@@ -48,6 +48,6 @@
     "request": "^2.88.0"
   },
   "optionalDependencies": {
-    "@google-cloud/logging-bunyan": "^1.2.1"
+    "@google-cloud/logging-bunyan": "^2.0.0"
   }
 }
