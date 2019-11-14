@@ -57,7 +57,7 @@ declare class ServiceLogger {
     createChild(defaultAdditionalFields?: any): ServiceLogger;
     changeLogLevel(level: string): void;
     createLoggingDir(): void;
-    applyMiddlewareAccessLog(expressApp: Application, opts?: any): Application;
+    applyMiddlewareAccessLog(expressApp: Application, customTokens?: any, accessLogOptions?: any): Application;
     applyMiddlewareAccessLogFile(expressApp: Application, logFilePath: string): Application;
     setGlobal(): void;
 

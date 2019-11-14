@@ -9,7 +9,7 @@ const AUTH_INFO_USER_ID = "auth-info-user-id";
 
 class ExpressMiddlewares {
 
-    static accessLogMiddleware(serviceName, dockerMode, opts) {
+    static accessLogMiddleware(serviceName, dockerMode, customTokens = {}, accessLogOptions = {}) {
 
         serviceName = serviceName || "unknown";
         const hostName = os.hostname();
@@ -18,10 +18,10 @@ class ExpressMiddlewares {
         const optKeys = [];
 
         // Check for additional access logs
-        if (opts && typeof opts === "object") {
-            for (const key in opts) {
+        if (customTokens && typeof customTokens === "object") {
+            for (const key in customTokens) {
                 try {
-                    morgan.token(key, typeof opts[key] === "function" ? opts[key] : errorHandler);
+                    morgan.token(key, typeof customTokens[key] === "function" ? customTokens[key] : errorHandler);
                 }
                 catch(err) {
                     morgan.token(key, errorHandler);
@@ -138,7 +138,7 @@ class ExpressMiddlewares {
             " \"current_color\": \":service_color\", \"remote_client_id\": \":remote_client_id\"," +
             " \"user_agent\": \":user_agent\", " +
             `${optKeys.length ? optKeys.join(", ") + "," : ""}` + " \"bytes_received\": \":bytes_received\" }",
-            {});
+            accessLogOptions);
     }
 
     accessLogMiddlewareFile(filePath, dockerMode) {

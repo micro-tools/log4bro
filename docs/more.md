@@ -84,6 +84,36 @@ var app = express();
 // log an elk formatted access log to cout
 logger.applyMiddlewareAccessLog(app);
 
+// pass morgan options
+// for example [skip option](https://github.com/expressjs/morgan#skip): only log error responses
+logger.applyMiddlewareAccessLog(app, undefined, {
+  skip: function(req, res) {
+    return res.statusCode < 400;
+  }
+});
+
+
 //log an elk formatted access log to a file
 logger.applyMiddlewareAccessLogFile(app, "./access_log.json");
+```
+
+## [Create Custom log fields](https://github.com/expressjs/morgan#creating-new-tokens)
+```javascript
+logger.applyMiddlewareAccessLog(app, {
+  new_fancy_field: (req, res) => {
+    return 'i-am-your-new-field-in-access-log';
+  }
+});
+
+```
+
+## [skip logging](https://github.com/expressjs/morgan#skip) based on matching condition
+
+```javascript
+// only log error responses
+logger.applyMiddlewareAccessLog(app, undefined, {
+  skip: function(req, res) {
+    return res.statusCode < 400;
+  }
+});
 ```
