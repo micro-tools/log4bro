@@ -1,5 +1,6 @@
 import bunyan = require("bunyan");
 import { Application } from "express";
+import { Options as MorganOptions } from "morgan"
 
 interface ILogFieldOptions {
     application_type?: string;
@@ -57,7 +58,7 @@ declare class ServiceLogger {
     createChild(defaultAdditionalFields?: any): ServiceLogger;
     changeLogLevel(level: string): void;
     createLoggingDir(): void;
-    applyMiddlewareAccessLog(expressApp: Application, customTokens?: any, accessLogOptions?: any): Application;
+    applyMiddlewareAccessLog(expressApp: Application, customTokens?: any, accessLogOptions?: MorganOptions): Application;
     applyMiddlewareAccessLogFile(expressApp: Application, logFilePath: string): Application;
     setGlobal(): void;
 
