@@ -32,6 +32,8 @@
   },
   "homepage": "https://github.com/micro-tools/log4bro",
   "dependencies": {
+    "@types/morgan": "^1.7.37",
+    "@types/express": "^4.17.2",
     "bunyan": "~1.8.12",
     "chalk": "~3.0.0",
     "graceful-fs": "~4.2.3",
@@ -40,7 +42,6 @@
   },
   "devDependencies": {
     "@types/bunyan": "^1.8.6",
-    "@types/express": "^4.17.2",
     "express": "^4.17.1",
     "intercept-stdout": "~0.1.2",
     "istanbul": "~0.4.5",
