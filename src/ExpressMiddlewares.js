@@ -6,6 +6,7 @@ const os = require("os");
 
 const CUSTOMER_UUID = "customer-uuid";
 const AUTH_INFO_USER_ID = "auth-info-user-id";
+const AUTH_REMOTE_CLIENT_ID = "remote-client-id";
 
 class ExpressMiddlewares {
 
