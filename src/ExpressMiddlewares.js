@@ -89,6 +89,11 @@ class ExpressMiddlewares {
                     rcId = request.headers[AUTH_INFO_USER_ID];
                 }
 
+                if (request.headers[AUTH_REMOTE_CLIENT_ID])
+                {
+                    rcId = request.headers[AUTH_REMOTE_CLIENT_ID];
+                }
+
                 if (!rcId) {
                     rcId = "unknown";
                 }
