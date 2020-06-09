@@ -6,7 +6,6 @@ const os = require("os");
 
 const CUSTOMER_UUID = "customer-uuid";
 const AUTH_INFO_USER_ID = "auth-info-user-id";
-const AUTH_REMOTE_CLIENT_ID = "remote-client-id";
 
 class ExpressMiddlewares {
 
@@ -90,10 +89,9 @@ class ExpressMiddlewares {
                     rcId = request.headers[AUTH_INFO_USER_ID];
                 }
 
-                if (request.headers[AUTH_REMOTE_CLIENT_ID])
-                {
-                    rcId = request.headers[AUTH_REMOTE_CLIENT_ID];
-                }
+                if (response.locals.remoteClientId) {
+                    rcId = response.locals.remoteClientId;
+                  }
 
                 if (!rcId) {
                     rcId = "unknown";
