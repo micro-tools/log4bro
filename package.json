@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/micro-tools/log4bro",
   "dependencies": {
+    "@types/morgan": "^1.9.1",
     "bunyan": "~1.8.12",
     "chalk": "~4.0.0",
     "graceful-fs": "~4.2.4",
