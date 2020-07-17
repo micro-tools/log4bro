@@ -20,7 +20,7 @@ declare namespace ServiceLogger {
         logLevel?: string;
         serviceName?: string;
         stackdriver?: {scope: string};
-        caller?: string;
+        caller?: boolean;
         loggerName?: string;
     }
 }
