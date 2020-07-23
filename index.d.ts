@@ -35,7 +35,7 @@ declare class ServiceLogger {
     logLevel: string;
     serviceName: string;
     stackdriver: { scope: string };
-    caller: string;
+    caller: boolean;
     skipDebug: boolean;
     LOG: bunyan;
 
@@ -51,7 +51,7 @@ declare class ServiceLogger {
                 logFieldOptions: ILogFieldOptions,
                 level: string,
                 serviceName: string,
-                caller: string,
+                caller: boolean,
                 stackdriver: { scope: string },
     );
 
